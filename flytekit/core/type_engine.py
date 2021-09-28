@@ -7,7 +7,6 @@ import enum
 import inspect
 import json as _json
 import mimetypes
-import pickle
 import typing
 from abc import ABC, abstractmethod
 from typing import Optional, Type, cast
@@ -29,7 +28,6 @@ from flytekit.loggers import logger
 from flytekit.models import interface as _interface_models
 from flytekit.models import types as _type_models
 from flytekit.models.core import types as _core_types
-from flytekit.models.interface import Variable
 from flytekit.models.literals import Literal, LiteralCollection, LiteralMap, Primitive, Scalar
 from flytekit.models.types import LiteralType, SimpleType
 
@@ -445,7 +443,6 @@ class TypeEngine(typing.Generic[T]):
         ctx: FlyteContext,
         lm: LiteralMap,
         python_types: typing.Dict[str, type],
-        literal_type: typing.Dict[str, Variable] = None,
     ) -> typing.Dict[str, typing.Any]:
         """
         Given a ``LiteralMap`` (usually an input into a task - intermediate), convert to kwargs for the task
