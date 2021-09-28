@@ -577,3 +577,11 @@ def test_dict_to_literal_map_with_wrong_input_type():
     guessed_python_types = {"a": str}
     with pytest.raises(user_exceptions.FlyteTypeException):
         TypeEngine.dict_to_literal_map(ctx, input, guessed_python_types)
+
+
+def test_blah():
+    from flytekit.remote import FlyteRemote
+    remote = FlyteRemote.from_config("flytesnacks", "development")
+    exe2 = remote.fetch_workflow_execution(name='fdde7d53867b74cd9885')
+    exe2 = remote.sync(exe2)
+    print(exe2._raw_outputs['o0'])

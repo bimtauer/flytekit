@@ -284,6 +284,13 @@ class DataclassTransformer(TypeTransformer[object]):
         dc = cast(DataClassJsonMixin, expected_python_type).from_json(_json_format.MessageToJson(lv.scalar.generic))
         return self._fix_dataclass_int(expected_python_type, dc)
 
+    def guess_python_type(self, literal_type: LiteralType) -> Type[T]:
+        if literal_type.simple == SimpleType.STRUCT:
+            if literal_type.metadata is not None and "definitions" in literal_type.metadata:
+                return convert_json_schema_to_python_class(literal_type.metadata)
+
+        raise ValueError(f"Dictionary transformer cannot reverse {literal_type}")
+
 
 class ProtobufTransformer(TypeTransformer[_proto_reflection.GeneratedProtocolMessageType]):
     PB_FIELD_KEY = "pb_type"
@@ -509,6 +516,10 @@ class TypeEngine(typing.Generic[T]):
                 return transformer.guess_python_type(flyte_type)
             except ValueError:
                 logger.debug(f"Skipping transformer {transformer.name} for {flyte_type}")
+        try:
+            return cls._DATACLASS_TRANSFORMER.guess_python_type(literal_type=flyte_type)
+        except ValueError:
+            logger.debug(f"Skipping transformer {cls._DATACLASS_TRANSFORMER.name} for {flyte_type}")
         raise ValueError(f"No transformers could reverse Flyte literal type {flyte_type}")
 
 
@@ -640,8 +651,6 @@ class DictTransformer(TypeTransformer[dict]):
         if literal_type.simple == SimpleType.STRUCT:
             if literal_type.metadata is None:
                 return dict
-            if "definitions" in literal_type.metadata:
-                return convert_json_schema_to_python_class(literal_type.metadata)
 
         raise ValueError(f"Dictionary transformer cannot reverse {literal_type}")
 
@@ -755,7 +764,8 @@ def convert_json_schema_to_python_class(schema):
             except KeyError:
                 raise AttributeError(key)
 
-    return dataclass_json(dataclasses.dataclass(Model))
+    dc = dataclass_json(dataclasses.dataclass(Model))
+    return dc
 
 
 def _check_and_covert_float(lv: Literal) -> float:
