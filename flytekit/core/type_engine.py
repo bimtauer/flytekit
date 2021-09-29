@@ -516,6 +516,9 @@ class TypeEngine(typing.Generic[T]):
                 return transformer.guess_python_type(flyte_type)
             except ValueError:
                 logger.debug(f"Skipping transformer {transformer.name} for {flyte_type}")
+
+        # Because the dataclass transformer is handled explicity in the get_transformer code, we have to handle it
+        # separately here too.
         try:
             return cls._DATACLASS_TRANSFORMER.guess_python_type(literal_type=flyte_type)
         except ValueError:
@@ -764,8 +767,7 @@ def convert_json_schema_to_python_class(schema):
             except KeyError:
                 raise AttributeError(key)
 
-    dc = dataclass_json(dataclasses.dataclass(Model))
-    return dc
+    return dataclass_json(dataclasses.dataclass(Model))
 
 
 def _check_and_covert_float(lv: Literal) -> float:
