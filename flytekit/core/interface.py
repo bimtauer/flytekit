@@ -14,7 +14,6 @@ from flytekit.core.docstring import Docstring
 from flytekit.core.type_engine import TypeEngine
 from flytekit.loggers import logger
 from flytekit.models import interface as _interface_models
-from flytekit.types.file.file import FlyteFilePathTransformer
 from flytekit.types.pickle import FlytePickle
 
 

@@ -94,7 +94,7 @@ setup(
         "singledispatchmethod; python_version < '3.8.0'",
         "docstring-parser>=0.9.0",
         "diskcache>=5.2.1",
-        "cloudpickle>=2.0.0"
+        "cloudpickle>=2.0.0",
     ],
     extras_require=extras_require,
     scripts=[
