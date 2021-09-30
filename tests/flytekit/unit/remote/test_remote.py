@@ -21,7 +21,6 @@ from flytekit.models.task import Task
 from flytekit.models.types import LiteralType, SimpleType
 from flytekit.remote import FlyteWorkflow
 from flytekit.remote.remote import FlyteRemote
-from flytekit.remote.workflow_execution import FlyteWorkflowExecution
 
 CLIENT_METHODS = {
     ResourceType.WORKFLOW: "list_workflows_paginated",
