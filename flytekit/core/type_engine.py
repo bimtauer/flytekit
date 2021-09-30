@@ -289,7 +289,7 @@ class DataclassTransformer(TypeTransformer[object]):
             if literal_type.metadata is not None and "definitions" in literal_type.metadata:
                 return convert_json_schema_to_python_class(literal_type.metadata)
 
-        raise ValueError(f"Dictionary transformer cannot reverse {literal_type}")
+        raise ValueError(f"Dataclass transformer cannot reverse {literal_type}")
 
 
 class ProtobufTransformer(TypeTransformer[_proto_reflection.GeneratedProtocolMessageType]):
