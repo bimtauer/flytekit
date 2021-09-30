@@ -18,6 +18,7 @@ from flytekit.core.type_engine import (
     DataclassTransformer,
     DictTransformer,
     ListTransformer,
+    LiteralsResolver,
     SimpleTransformer,
     TypeEngine,
     convert_json_schema_to_python_class,
@@ -577,3 +578,41 @@ def test_dict_to_literal_map_with_wrong_input_type():
     guessed_python_types = {"a": str}
     with pytest.raises(user_exceptions.FlyteTypeException):
         TypeEngine.dict_to_literal_map(ctx, input, guessed_python_types)
+
+
+@pytest.mark.parametrize(
+    "literal_value,python_type,expected_python_value",
+    [
+        (
+            Literal(
+                collection=LiteralCollection(
+                    literals=[
+                        Literal(scalar=Scalar(primitive=Primitive(integer=1))),
+                        Literal(scalar=Scalar(primitive=Primitive(integer=2))),
+                        Literal(scalar=Scalar(primitive=Primitive(integer=3))),
+                    ]
+                )
+            ),
+            typing.List[int],
+            [1, 2, 3],
+        ),
+        (
+            Literal(
+                map=LiteralMap(
+                    literals={
+                        "k1": Literal(scalar=Scalar(primitive=Primitive(string_value="v1"))),
+                        "k2": Literal(scalar=Scalar(primitive=Primitive(string_value="2"))),
+                    },
+                )
+            ),
+            typing.Dict[str, str],
+            {"k1": "v1", "k2": "2"},
+        ),
+    ],
+)
+def test_literals_resolver(literal_value, python_type, expected_python_value):
+    lit_dict = {"a": literal_value}
+
+    lr = LiteralsResolver(lit_dict)
+    out = lr.get("a", python_type)
+    assert out == expected_python_value

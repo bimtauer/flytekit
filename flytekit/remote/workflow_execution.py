@@ -1,28 +1,15 @@
-import typing
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from flytekit import FlyteContext
 from flytekit.clients.helpers import iterate_node_executions as _iterate_node_executions
 from flytekit.common.exceptions import user as _user_exceptions
 from flytekit.common.mixins import artifact as _artifact
-from flytekit.core.type_engine import TypeEngine
+from flytekit.core.type_engine import LiteralsResolver
 from flytekit.engines.flyte import engine as _flyte_engine
 from flytekit.models import execution as _execution_models
 from flytekit.models import filters as _filter_models
 from flytekit.models.core import execution as _core_execution_models
 from flytekit.remote import identifier as _core_identifier
 from flytekit.remote import nodes as _nodes
-
-
-class OutputResolver(object):
-
-    def __init__(self, raw_outputs):
-        self._raw_outputs = raw_outputs
-
-    def get(self, attr: str, as_type: typing.Type):
-        if attr not in self._raw_outputs:
-            raise AttributeError(f"Attribute {attr} not found")
-        return TypeEngine.to_python_value(FlyteContext.current_context(), self._raw_outputs[attr], as_type)
 
 
 class FlyteWorkflowExecution(_execution_models.Execution, _artifact.ExecutionArtifact):
@@ -33,8 +20,8 @@ class FlyteWorkflowExecution(_execution_models.Execution, _artifact.ExecutionArt
         self._node_executions = None
         self._inputs = None
         self._outputs = None
-        self._raw_inputs = None
-        self._raw_outputs = None
+        self._raw_inputs: Optional[LiteralsResolver] = None
+        self._raw_outputs: Optional[LiteralsResolver] = None
 
     @property
     def node_executions(self) -> Dict[str, _nodes.FlyteNodeExecution]:
@@ -64,8 +51,16 @@ class FlyteWorkflowExecution(_execution_models.Execution, _artifact.ExecutionArt
         return self._outputs
 
     @property
-    def raw_outputs(self) -> OutputResolver:
-        return OutputResolver(self._raw_outputs)
+    def raw_outputs(self) -> LiteralsResolver:
+        if self._raw_outputs is None:
+            raise ValueError(f"WF execution: {self} doesn't have raw outputs set")
+        return self._raw_outputs
+
+    @property
+    def raw_inputs(self) -> LiteralsResolver:
+        if self._raw_inputs is None:
+            raise ValueError(f"WF execution: {self} doesn't have raw inputs set")
+        return self._raw_inputs
 
     @property
     def error(self) -> _core_execution_models.ExecutionError:
