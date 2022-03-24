@@ -14,7 +14,7 @@ from flytekit.configuration import (
 )
 from flytekit.core import context_manager
 from flytekit.tools import fast_registration, module_loader, serialize_helpers
-
+from flytekit.tools.package_helpers import create_archive
 
 @click.command("package")
 @click.option(
@@ -125,8 +125,7 @@ def package(ctx, image_config, source, output, force, fast, in_container_source_
                     archive_fname = os.path.join(output_tmpdir, f"{digest}.tar.gz")
                     click.secho(f"Fast mode enabled: compressed archive {archive_fname}", dim=True)
                     # Write using gzip
-                    with tarfile.open(archive_fname, "w:gz") as tar:
-                        tar.add(source, arcname="", filter=fast_registration.filter_tar_file_fn)
+                    create_archive(source, archive_fname)
 
                 with tarfile.open(output, "w:gz") as tar:
                     tar.add(output_tmpdir, arcname="")
